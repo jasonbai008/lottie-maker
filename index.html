@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottie Maker - 动画生成工具</title>
+    <!-- 引入 Vue 2 -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- 引入 Lottie Player -->
+    <script src="./lib/lottie-player.js"></script>
+    <style>
+        :root {
+            --primary-color: #00a68a;
+            --bg-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-color: #212529;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #app {
+            background: white;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 左侧预览区域 */
+        .preview-section {
+            flex: 1;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-right: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 右侧设置区域 */
+        .settings-section {
+            width: 380px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 0 0 24px 0;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f1f3f5;
+            color: var(--text-color);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #adb5bd;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- 左侧预览区域 -->
+        <div class="preview-section">
+            <div class="preview-container">
+                <!-- Lottie 播放组件 -->
+                <lottie-player v-if="lottieSrc" ref="player" :src="lottieSrc" :background="bgColor" :speed="1"
+                    :loop="isLoop" :style="{ width: resolution + 'px', height: resolution + 'px' }" autoplay>
+                </lottie-player>
+                <div v-else class="placeholder-text">
+                    请在右侧上传 Lottie JSON 文件查看预览
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧设置区域 -->
+        <div class="settings-section">
+            <h2>Lottie Animation Generator</h2>
+
+            <!-- 上传按钮 -->
+            <div class="form-group">
+                <button class="btn btn-secondary" @click="triggerUpload">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                        <path
+                            d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                    </svg>
+                    上传 JSON 文件
+                </button>
+                <!-- 生成代码按钮 -->
+                <button class="btn btn-primary" v-if="lottieSrc" @click="generateCodeAction">
+                    生成代码
+                </button>
+                <input type="file" ref="fileInput" class="upload-input" accept=".json" @change="handleFileUpload">
+            </div>
+
+            <!-- 代码展示区域 -->
+            <div v-if="showCode" style="margin-top: 20px;">
+                <label class="form-label">生成的代码</label>
+                <textarea class="input-control"
+                    style="height: 200px; font-family: monospace; font-size: 12px; resize: none;" readonly
+                    v-model="generatedCode"></textarea>
+                <button class="btn btn-secondary" style="margin-top: 12px;" @click="copyCode">
+                    复制代码
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                lottieSrc: './assets/robot.json', // Lottie 文件的 URL 或 Data URL
+                fileName: 'animation.json',
+                bgColor: 'transparent',
+                resolution: 300,
+                isLoop: true,
+                showCode: false // 是否显示生成的代码
+            },
+            computed: {
+                /**
+                 * 计算属性：生成用户可以直接使用的展示代码
+                 */
+                generatedCode() {
+                    if (!this.lottieSrc) return '';
+                    return this.getEmbedCode(this.fileName, this.bgColor, this.resolution, this.isLoop);
+                }
+            },
+            methods: {
+                /**
+                 * 点击生成代码按钮
+                 */
+                generateCodeAction() {
+                    this.showCode = true;
+                },
+
+                /**
+                 * 生成可复制的嵌入代码
+                 * @param {string} src - Lottie 资源 URL 或文件名                
+                 * @returns {string}
+                 */
+                getEmbedCode(src) {
+                    return `<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"><\/script>
+    <lottie-player src="${src}"><\/lottie-player>`;
+                },
+
+                /**
+                * 触发文件上传点击
+                */
+                triggerUpload() {
+                    this.$refs.fileInput.click();
+                },
+
+                /**
+                * 处理文件上传逻辑
+                * @param {Event} event
+                */
+                handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.fileName = file.name;
+                    this.showCode = false; // 上传新文件时隐藏之前的代码
+                    const reader = new FileReader();
+
+                    // 将 JSON 文件读取为 Data URL 以供预览
+                    reader.onload = (e) => {
+                        this.lottieSrc = e.target.result;
+                        // 提示：这里已经拿到了 JSON 数据 (e.target.result 是 data:application/json;base64,...)
+                        // 如果需要读取内部数据，可以使用 reader.readAsText(file) 并 JSON.parse
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                /**
+                * 复制代码到剪切板
+                */
+                copyCode() {
+                    const text = this.generatedCode;
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert('代码已复制到剪切板！');
+                    } catch (err) {
+                        console.error('复制失败', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
