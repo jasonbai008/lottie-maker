@@ -191,6 +191,29 @@
             text-align: center;
             padding: 20px;
         }
+
+        /* 成功动画层 */
+        .success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 代码文本域 */
+        .code-textarea {
+            height: 180px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: none;
+        }
     </style>
 </head>
 
@@ -268,8 +291,7 @@
             <!-- 代码展示区域 -->
             <div v-if="showCode" style="margin-top: 20px; position: relative;">
                 <!-- 成功动画层 -->
-                <div v-if="showSuccessAnimation"
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div v-if="showSuccessAnimation" class="success-overlay">
                     <lottie-player src="./assets/celebrations.json" autoplay loop
                         style="width: 250px; height: 250px;"></lottie-player>
                 </div>
@@ -277,9 +299,7 @@
                 <!-- 代码内容层 -->
                 <div :style="{ opacity: showSuccessAnimation ? 0 : 1, transition: 'opacity 0.3s' }">
                     <label class="form-label">生成的代码 (CDN 地址)</label>
-                    <textarea class="input-control"
-                        style="height: 180px; font-family: monospace; font-size: 12px; resize: none;"
-                        v-model="generatedCode"></textarea>
+                    <textarea class="input-control code-textarea" v-model="generatedCode"></textarea>
                     <button class="btn btn-secondary" style="margin-top: 12px;" @click="copyCode">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path
@@ -333,9 +353,10 @@
                         return;
                     }
 
-                    // 如果没有文件内容（如初始默认 JSON），则需要用户重新上传
+                    // 如果没有文件内容（如初始默认 JSON），直接使用默认 CDN 地址
                     if (!this.fileContent) {
-                        alert('请先上传一个新的 JSON 文件');
+                        this.cdnUrl = 'https://lottie.jasonbai.dpdns.org/assets/robot.json';
+                        this.showCodeWithAnimation();
                         return;
                     }
 
