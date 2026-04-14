@@ -4,16 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
     <title>Lottie Maker - 动画生成工具</title>
     <!-- 引入 Vue 2 -->
-    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="./lib/vue.js"></script>
     <!-- 引入 Lottie Player -->
     <script src="./lib/lottie-player.js"></script>
     <style>
         :root {
             --primary-color: #00a68a;
             --bg-color: #f8f9fa;
-            --border-color: #e9ecef;
+            --border-color: #d1d5db;
+            /* 边框颜色加深 */
             --text-color: #212529;
         }
 
@@ -77,10 +79,6 @@
             font-weight: 700;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
         .form-label {
             display: block;
             font-size: 14px;
@@ -98,6 +96,7 @@
             box-sizing: border-box;
             outline: none;
             transition: border-color 0.2s;
+            word-break: break-all;
         }
 
         .input-control:focus {
@@ -108,31 +107,79 @@
         .btn {
             width: 100%;
             padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            /* 更圆润的角 */
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
+            box-sizing: border-box;
+            text-decoration: none;
         }
 
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
+            box-shadow: 0 4px 12px rgba(0, 166, 138, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #008f77;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 166, 138, 0.3);
+            opacity: 1;
+            /* 覆盖全局 hover 透明度 */
         }
 
         .btn-secondary {
-            background-color: #f1f3f5;
+            background-color: white;
             color: var(--text-color);
+            border: 1px solid #b1b5ba;
+            /* 按钮边框颜色加深，使其更具轮廓感 */
         }
 
-        .btn:hover {
-            opacity: 0.9;
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: rgba(0, 166, 138, 0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            opacity: 1;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn-row .btn {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
         }
 
         .upload-input {
@@ -154,8 +201,8 @@
         <div class="preview-section">
             <div class="preview-container">
                 <!-- Lottie 播放组件 -->
-                <lottie-player v-if="lottieSrc" ref="player" :src="lottieSrc" :background="bgColor" :speed="1"
-                    :loop="isLoop" :style="{ width: resolution + 'px', height: resolution + 'px' }" autoplay>
+                <lottie-player v-if="lottieSrc" ref="player" :key="lottieSrc" :src="lottieSrc" :background="bgColor"
+                    :speed="1" :loop="isLoop" :style="{ width: resolution + 'px', height: resolution + 'px' }" autoplay>
                 </lottie-player>
                 <div v-else class="placeholder-text">
                     请在右侧上传 Lottie JSON 文件查看预览
@@ -169,6 +216,24 @@
 
             <!-- 上传按钮 -->
             <div class="form-group">
+                <!-- 资源按钮 -->
+                <div class="btn-row">
+                    <a href="https://lottiefiles.com/free-animations?type=free" target="_blank"
+                        class="btn btn-secondary">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path
+                                d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.593l-.837-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.845 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z" />
+                        </svg>
+                        Free Animations
+                    </a>
+                    <a href="https://lottiefiles.com/lottie-to-gif" target="_blank" class="btn btn-secondary">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path
+                                d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-1.158 6.308c-.155.103-.346.19-.573.256A3.492 3.492 0 0 1 8 14c-1.933 0-3.5-1.567-3.5-3.5 0-1.56 1.024-2.88 2.433-3.333a.5.5 0 1 1 .305.952C6.11 8.51 5.5 9.435 5.5 10.5 5.5 11.88 6.62 13 8 13c.474 0 .913-.132 1.288-.36l-.004-.006a.5.5 0 1 1 .83.558l-.141.216zM4.466 9H.534a.25.25 0 0 1-.192-.41l1.966-2.36a.25.25 0 0 1 .384 0l1.966 2.36A.25.25 0 0 1 4.466 9zM5.624 2.692c.155-.103.346-.19.573-.256A3.492 3.492 0 0 1 8 2c1.933 0 3.5-1.567 3.5 3.5 0 1.56-1.024 2.88-2.433 3.333a.5.5 0 1 1-.305-.952C10.89 7.49 11.5 6.565 11.5 5.5 11.5 4.12 10.38 3 9 3c-.474 0-.913.132-1.288.36l.004.006a.5.5 0 1 1-.83-.558l.141-.216z" />
+                        </svg>
+                        Lottie to GIF
+                    </a>
+                </div>
                 <button class="btn btn-secondary" @click="triggerUpload">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path
@@ -180,8 +245,22 @@
                 </button>
                 <!-- 生成代码按钮 -->
                 <button class="btn btn-primary" v-if="lottieSrc" @click="generateCodeAction" :disabled="isGenerating">
-                    <span v-if="isGenerating">正在生成...</span>
-                    <span v-else>生成代码</span>
+                    <template v-if="isGenerating">
+                        <svg class="animate-spin" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                            <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" stroke-dasharray="22 10"
+                                stroke-linecap="round" opacity="0.3"></circle>
+                            <path d="M8 1a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            </path>
+                        </svg>
+                        正在生成...
+                    </template>
+                    <template v-else>
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path
+                                d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z" />
+                        </svg>
+                        生成代码
+                    </template>
                 </button>
                 <input type="file" ref="fileInput" class="upload-input" accept=".json" @change="handleFileUpload">
             </div>
@@ -190,9 +269,15 @@
             <div v-if="showCode" style="margin-top: 20px;">
                 <label class="form-label">生成的代码 (CDN 地址)</label>
                 <textarea class="input-control"
-                    style="height: 200px; font-family: monospace; font-size: 12px; resize: none;" readonly
+                    style="height: 180px; font-family: monospace; font-size: 12px; resize: none;"
                     v-model="generatedCode"></textarea>
                 <button class="btn btn-secondary" style="margin-top: 12px;" @click="copyCode">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
+                        <path
+                            d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
+                    </svg>
                     复制代码
                 </button>
             </div>
@@ -277,8 +362,7 @@
                  * @returns {string}
                  */
                 getEmbedCode(src) {
-                    return `<script src="https://lottie.jasonbai.dpdns.org/lib/lottie-player.js"><\/script>
-<lottie-player src="${src}"><\/lottie-player>`;
+                    return `<script src="https://lottie.jasonbai.dpdns.org/lib/lottie-player.js"><\/script>\n\n<lottie-player src="${src}" loop autoplay style="width:200px;height:200px;"><\/lottie-player>`;
                 },
 
                 /**
@@ -296,6 +380,12 @@
                     const file = event.target.files[0];
                     if (!file) return;
 
+                    // 检查文件类型
+                    if (!file.name.toLowerCase().endsWith('.json')) {
+                        alert('请上传 JSON 格式的 Lottie 文件');
+                        return;
+                    }
+
                     this.fileName = file.name;
                     this.showCode = false; // 上传新文件时隐藏之前的代码
                     this.cdnUrl = ''; // 重置之前的 CDN 地址
@@ -306,12 +396,20 @@
                     // 1. 读取为 Data URL 以供本地预览
                     reader.onload = (e) => {
                         this.lottieSrc = e.target.result;
+                        // 重置文件输入框的值，以便可以重复上传同一个文件
+                        event.target.value = '';
+                    };
+                    reader.onerror = () => {
+                        alert('读取预览文件失败');
                     };
                     reader.readAsDataURL(file);
 
                     // 2. 读取为纯文本以供上传
                     textReader.onload = (e) => {
                         this.fileContent = e.target.result;
+                    };
+                    textReader.onerror = () => {
+                        console.error('读取文件内容失败');
                     };
                     textReader.readAsText(file);
                 },
