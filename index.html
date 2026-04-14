@@ -214,6 +214,56 @@
             font-size: 12px;
             resize: none;
         }
+
+        /* 响应式适配 - 移动端 */
+        @media (max-width: 800px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                padding: 20px 0;
+                align-items: flex-start;
+            }
+
+            #app {
+                flex-direction: column;
+                width: 95%;
+                height: auto;
+                max-height: none;
+                margin: 0 auto;
+                border-radius: 16px;
+            }
+
+            .preview-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                height: 300px;
+                /* 移动端预览区固定高度 */
+                flex: none;
+            }
+
+            .preview-container {
+                padding: 20px;
+                box-sizing: border-box;
+            }
+
+            .settings-section {
+                width: 100%;
+                padding: 24px;
+                box-sizing: border-box;
+                overflow-y: visible;
+                /* 在移动端，容器高度自适应，不需要内部滚动 */
+            }
+
+            h2 {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+            .btn-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 
