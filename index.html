@@ -371,6 +371,7 @@
                 lottieSrc: './assets/robot.json', // Lottie 文件的预览 URL (本地或 Data URL)
                 fileName: 'animation.json',
                 fileContent: null, // JSON 文件内容
+                rawFile: null, // 原始文件对象
                 cdnUrl: '', // 上传成功后的 CDN URL
                 bgColor: 'transparent',
                 resolution: 300,
@@ -379,7 +380,7 @@
                 showSuccessAnimation: false, // 是否显示成功动画
                 isGenerating: false, // 是否正在上传生成代码
                 // Cloudflare Worker 上传接口
-                workerUrl: 'https://github.jasonbai.dpdns.org'
+                workerUrl: 'http://upload.jasonbai.dpdns.org'
             },
             computed: {
                 /**
@@ -403,32 +404,31 @@
                         return;
                     }
 
-                    // 如果没有文件内容（如初始默认 JSON），直接使用默认 CDN 地址
-                    if (!this.fileContent) {
-                        this.cdnUrl = 'https://lottie.jasonbai.dpdns.org/assets/robot.json';
+                    // 如果没有上传文件（如初始默认 JSON），直接使用默认 CDN 地址
+                    if (!this.rawFile) {
+                        this.cdnUrl = 'https://asset.jasonbai.dpdns.org/lottie/robot.json';
                         this.showCodeWithAnimation();
                         return;
                     }
 
                     this.isGenerating = true;
                     try {
+                        const formData = new FormData();
+                        formData.append('file', this.rawFile);
+                        formData.append('path', 'lottie');
+
                         const response = await fetch(this.workerUrl, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                filename: this.fileName,
-                                content: this.fileContent
-                            })
+                            body: formData
                         });
 
-                        const data = await response.json();
-                        if (data.success) {
+                        if (response.ok) {
+                            const data = await response.json();
                             this.cdnUrl = data.url;
                             this.showCodeWithAnimation();
                         } else {
-                            throw new Error(data.error || '上传失败');
+                            const errorText = await response.text();
+                            throw new Error(errorText || '上传失败');
                         }
                     } catch (err) {
                         console.error('生成失败:', err);
@@ -481,6 +481,7 @@
                     }
 
                     this.fileName = file.name;
+                    this.rawFile = file; // 保存原始文件对象用于上传
                     this.showCode = false; // 上传新文件时隐藏之前的代码
                     this.cdnUrl = ''; // 重置之前的 CDN 地址
 
